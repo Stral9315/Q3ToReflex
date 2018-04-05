@@ -29,18 +29,25 @@ struct TPatchDef
 	std::string m_Material;
 };
 
+struct TEntity
+{
+	std::map<std::string, std::string> m_Properties;
+	std::string	m_Classname;
+};
+
 class CQ3MapParser
 {
 	// Variables
 public:
 	std::vector<TPlaneBrush> m_Brushes;
 	std::vector<TPatchDef> m_PatchDefs;
+	std::vector<TEntity> m_Entities;
 
 	// Functions
 public:
 	CQ3MapParser();
 	const bool LoadMap(const char* _kpcFileName);
-	void ParseEntity(const std::vector<std::string>& _krTokens);
+	void ParseEntity(TEntity& _rEnt, const std::vector<std::string>& _krTokens);
 	void ParseBrush(const std::vector<std::vector<std::string>>& _krLines);
 	const bool ParseBrushFace(TPlaneBrushFace& _rFace, const std::vector<std::string>& _krTokens);
 

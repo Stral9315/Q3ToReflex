@@ -39,19 +39,19 @@ const std::string& GetBrushString(std::string& _rOutput, const TPolyBrush& _krBr
 		std::stringstream ssOutput;
 
 		ssOutput << std::fixed;
-		ssOutput << "brush" << std::endl;
-		ssOutput << "\tvertices" << std::endl;
+		ssOutput << "\tbrush" << std::endl;
+		ssOutput << "\t\tvertices" << std::endl;
 		for(size_t i = 0; i < _krBrush.m_Vertices.size(); ++i)
 		{
 			// Coordinate space needs to be transformed from q3 coordinate space to reflex coordinate space (RightHanded +Z Up -> LeftHanded +Y Up)
-			ssOutput << "\t\t" << _krBrush.m_Vertices[i].m_dX << " " << _krBrush.m_Vertices[i].m_dZ << " " << _krBrush.m_Vertices[i].m_dY << " " << std::endl;
+			ssOutput << "\t\t\t" << _krBrush.m_Vertices[i].m_dX << " " << _krBrush.m_Vertices[i].m_dZ << " " << _krBrush.m_Vertices[i].m_dY << " " << std::endl;
 		}
-		ssOutput << "\tfaces" << std::endl;
+		ssOutput << "\t\tfaces" << std::endl;
 		for(size_t i = 0; i < _krBrush.m_Faces.size(); ++i)
 		{
 			if(_krBrush.m_Faces[i].m_Indices.size() > 2)
 			{
-				ssOutput << "\t\t" << _krBrush.m_Faces[i].m_dTexCoordU << " "
+				ssOutput << "\t\t\t" << _krBrush.m_Faces[i].m_dTexCoordU << " "
 					<< _krBrush.m_Faces[i].m_dTexCoordV << " "
 					<< _krBrush.m_Faces[i].m_dTexScaleU * 2.0 << " "
 					<< _krBrush.m_Faces[i].m_dTexScaleV * 2.0 << " "
@@ -150,6 +150,7 @@ int main(const int _kiArgC, const char** _kppcArgv)
 			PolyBrushes[i] = ToPolyBrush(TPolyBrush(), Parser.m_Brushes[i]);
 		}
 
+
 		std::vector<TPolyBrush> PatchBrushes;
 		for(size_t i = 0; i < Parser.m_PatchDefs.size(); ++i)
 		{
@@ -193,12 +194,13 @@ int main(const int _kiArgC, const char** _kppcArgv)
 		}
 
 		// Add map header and WorldSpawn entity
-		OutFile << "reflex map version 6\n"
-				<< "entity\n"
-				<< "\ttype WorldSpawn\n"
-				<< "\tColourXRGB32 clearColor ffffff\n"
+		OutFile << "reflex map version 8\n"
+				<< "global\n"
+				<< "\tentity\n"
+				<< "\t\ttype WorldSpawn\n";
+				/*<< "\tColourXRGB32 clearColor ffffff\n"
 				<< "\tColourXRGB32 worldColor0 0\n"
-				<< "\tColourXRGB32 worldColor1 0\n";
+				<< "\tColourXRGB32 worldColor1 0\n";*/
 		// Add brushes
 		for(size_t i = 0; i < PolyBrushes.size(); ++i)
 		{
@@ -212,6 +214,50 @@ int main(const int _kiArgC, const char** _kppcArgv)
 			{
 				const std::string PatchString = GetBrushString(std::string(), PatchBrushes[i], bNoClip, bNoTrigger, bAllCaulk);
 				OutFile << PatchString;
+			}
+		}
+		for (size_t i = 0; i < Parser.m_Entities.size(); i++)
+		{
+			if (Parser.m_Entities[i].m_Classname == "info_player_deathmatch")
+			{
+				auto origin = Parser.m_Entities[i].m_Properties.find("origin"); //Required
+				auto angle = Parser.m_Entities[i].m_Properties.find("angle");
+				auto spawnflags = Parser.m_Entities[i].m_Properties.find("spawnflags");
+				if (origin != Parser.m_Entities[i].m_Properties.end()) //Origin found
+				{
+					size_t offset;
+					std::string angleStr ="", spawnStr ="", originStr = "";
+					const char *originTemp = origin->second.c_str();
+					double x, y, z;
+					x = std::stod(originTemp, &offset);
+					originTemp += offset;
+					y = std::stod(originTemp, &offset);
+					originTemp += offset;
+					z = std::stod(originTemp, &offset);
+					originStr = "\t\tVector3 position " + std::to_string(x) +" "+ std::to_string(z) +" "+ std::to_string(y) +"\n";
+
+					if (angle != Parser.m_Entities[i].m_Properties.end())
+					{
+						angleStr = "\t\tVector3 angles "+std::to_string(std::stod(angle->second.c_str())+90.0f) +" "+ std::to_string(0.0000f) +" "+ std::to_string(0.0000f) + "\n"; //beautiful
+					} //+90 because that's how it is.
+
+					if (spawnflags != Parser.m_Entities[i].m_Properties.end())
+					{
+						int spawnfl = 0;
+						spawnfl = std::stoi(spawnflags->second.c_str());
+						if (spawnfl & 1)
+							spawnStr += "\t\tBool8 TeamA 0\n"; //idk why but it has to be 0
+						if (spawnfl & 2)
+							spawnStr += "\t\tBool8 TeamB 0\n";
+					}
+
+					OutFile << "\tentity\n"
+						<< "\t\ttype PlayerSpawn\n";
+					OutFile << originStr;
+					OutFile << angleStr;
+					OutFile << spawnStr;
+
+				}
 			}
 		}
 		// Close output file
