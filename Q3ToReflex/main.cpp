@@ -198,9 +198,6 @@ int main(const int _kiArgC, const char** _kppcArgv)
 				<< "global\n"
 				<< "\tentity\n"
 				<< "\t\ttype WorldSpawn\n";
-				/*<< "\tColourXRGB32 clearColor ffffff\n"
-				<< "\tColourXRGB32 worldColor0 0\n"
-				<< "\tColourXRGB32 worldColor1 0\n";*/
 		// Add brushes
 		for(size_t i = 0; i < PolyBrushes.size(); ++i)
 		{
@@ -223,49 +220,53 @@ int main(const int _kiArgC, const char** _kppcArgv)
 				Parser.m_Entities[i].m_Classname == "info_player_start2" ||
 				Parser.m_Entities[i].m_Classname == "info_player_coop")
 			{
-				auto origin = Parser.m_Entities[i].m_Properties.find("origin"); //Required
+				auto origin = Parser.m_Entities[i].m_Properties.find("origin");
 				auto angle = Parser.m_Entities[i].m_Properties.find("angle");
 				auto spawnflags = Parser.m_Entities[i].m_Properties.find("spawnflags");
 				double oldAngle = 0;
-				if (origin != Parser.m_Entities[i].m_Properties.end()) //Origin found
+				size_t offset;
+				std::string angleStr = "", spawnStr = "", originStr = "";
+
+				double x = 0.0f, y = 0.0f, z = 0.0f;
+
+				if (origin != Parser.m_Entities[i].m_Properties.end() && origin->second.size() > 0) //Origin found
 				{
-					size_t offset;
-					std::string angleStr ="", spawnStr ="", originStr = "";
 					const char *originTemp = origin->second.c_str();
-					double x, y, z;
 					x = std::stod(originTemp, &offset);
 					originTemp += offset;
 					y = std::stod(originTemp, &offset);
 					originTemp += offset;
 					z = std::stod(originTemp, &offset);
-					originStr = "\t\tVector3 position " + std::to_string(x) +" "+ std::to_string(z) +" "+ std::to_string(y) +"\n";
-
-					if (angle != Parser.m_Entities[i].m_Properties.end())
-						oldAngle = std::stod(angle->second.c_str());
-					angleStr = "\t\tVector3 angles " + std::to_string(oldAngle + 90.0f) + " " + std::to_string(0.0000f) + " " + std::to_string(0.0000f) + "\n"; //beautiful
-					if (spawnflags != Parser.m_Entities[i].m_Properties.end())
-					{
-						int spawnfl = 0;
-						spawnfl = std::stoi(spawnflags->second.c_str());
-						if (spawnfl & 1)
-							spawnStr += "\t\tBool8 TeamA 0\n"; //idk why but it has to be 0
-						if (spawnfl & 2)
-							spawnStr += "\t\tBool8 TeamB 0\n";
-					}
-
-					OutFile << "\tentity\n"
-						<< "\t\ttype PlayerSpawn\n";
-					OutFile << originStr;
-					OutFile << angleStr;
-					OutFile << spawnStr;
-
 				}
+
+				originStr = "\t\tVector3 position " + std::to_string(x) + " " + std::to_string(z) + " " + std::to_string(y) + "\n";
+				if (angle != Parser.m_Entities[i].m_Properties.end() && angle->second.size() > 0)
+					oldAngle = std::stod(angle->second.c_str());
+				angleStr = "\t\tVector3 angles " + std::to_string(oldAngle + 90.0f) + " " + std::to_string(0.0000f) + " " + std::to_string(0.0000f) + "\n"; //beautiful
+
+
+				if (spawnflags != Parser.m_Entities[i].m_Properties.end() && spawnflags->second.size() > 0)
+				{
+					int spawnfl = 0;
+					spawnfl = std::stoi(spawnflags->second.c_str());
+					if (spawnfl & 1)
+						spawnStr += "\t\tBool8 TeamA 0\n"; //idk why but it has to be 0
+					if (spawnfl & 2)
+						spawnStr += "\t\tBool8 TeamB 0\n";
+				}
+
+				OutFile << "\tentity\n"
+					<< "\t\ttype PlayerSpawn\n";
+				OutFile << originStr;
+				OutFile << angleStr;
+				OutFile << spawnStr;
+				
+				
 			}
 		}
 		// Close output file
 		OutFile.close();
 	}
-
 	// Return success
 	return(0);
 }
