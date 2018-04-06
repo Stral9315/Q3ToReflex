@@ -218,7 +218,10 @@ int main(const int _kiArgC, const char** _kppcArgv)
 		}
 		for (size_t i = 0; i < Parser.m_Entities.size(); i++)
 		{
-			if (Parser.m_Entities[i].m_Classname == "info_player_deathmatch")
+			if (Parser.m_Entities[i].m_Classname == "info_player_deathmatch" || 
+				Parser.m_Entities[i].m_Classname == "info_player_start" ||
+				Parser.m_Entities[i].m_Classname == "info_player_start2" ||
+				Parser.m_Entities[i].m_Classname == "info_player_coop")
 			{
 				auto origin = Parser.m_Entities[i].m_Properties.find("origin"); //Required
 				auto angle = Parser.m_Entities[i].m_Properties.find("angle");
