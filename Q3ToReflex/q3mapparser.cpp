@@ -158,10 +158,18 @@ const bool CQ3MapParser::ParseQ3Map(const char* _kpcFileName)
 							}
 							kpcTemp++;
 						}
-						std::cout << "" <<std::endl;
 					}
 					if (key && value) //We found both a key and value on this line, so add it.
 					{
+						if(!key->size())
+							std::cout << "warning: empty key on line " << std::to_string(i+1) << std::endl;
+						if (!value->size())
+							std::cout << "warning: empty value on line " << std::to_string(i+1) << std::endl;
+						if (*key == "origin" || *key == "angle") //Just to help out in case this happens.
+						{
+							try { std::stod(*value); }
+							catch (std::invalid_argument) { std::cout << "invalid value \""<< *value << "\" for key \"" << *key << "\" on line: " << std::to_string(i+1) << std::endl; return(false); }
+						}
 						tempEntity->m_Properties.insert_or_assign(*key, *value);
 					}	
 				}
