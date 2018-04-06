@@ -223,6 +223,7 @@ int main(const int _kiArgC, const char** _kppcArgv)
 				auto origin = Parser.m_Entities[i].m_Properties.find("origin"); //Required
 				auto angle = Parser.m_Entities[i].m_Properties.find("angle");
 				auto spawnflags = Parser.m_Entities[i].m_Properties.find("spawnflags");
+				double oldAngle = 0;
 				if (origin != Parser.m_Entities[i].m_Properties.end()) //Origin found
 				{
 					size_t offset;
@@ -237,10 +238,8 @@ int main(const int _kiArgC, const char** _kppcArgv)
 					originStr = "\t\tVector3 position " + std::to_string(x) +" "+ std::to_string(z) +" "+ std::to_string(y) +"\n";
 
 					if (angle != Parser.m_Entities[i].m_Properties.end())
-					{
-						angleStr = "\t\tVector3 angles "+std::to_string(std::stod(angle->second.c_str())+90.0f) +" "+ std::to_string(0.0000f) +" "+ std::to_string(0.0000f) + "\n"; //beautiful
-					} //+90 because that's how it is.
-
+						oldAngle = std::stod(angle->second.c_str());
+					angleStr = "\t\tVector3 angles " + std::to_string(oldAngle + 90.0f) + " " + std::to_string(0.0000f) + " " + std::to_string(0.0000f) + "\n"; //beautiful
 					if (spawnflags != Parser.m_Entities[i].m_Properties.end())
 					{
 						int spawnfl = 0;
