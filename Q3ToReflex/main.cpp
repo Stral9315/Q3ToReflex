@@ -215,10 +215,16 @@ int main(const int _kiArgC, const char** _kppcArgv)
 		}
 		for (size_t i = 0; i < Parser.m_Entities.size(); i++)
 		{
-			if (Parser.m_Entities[i].m_Classname == "info_player_deathmatch" || 
+			//For FPS Aim Trainer TrenchBroom Entity Definitions
+			int newSpawns = Parser.m_Entities[i].m_Classname == "AlphaSpawn" ? 1 :
+				(Parser.m_Entities[i].m_Classname == "BetaSpawn") ? 2 :
+				(Parser.m_Entities[i].m_Classname == "BothSpawn") ? 3 : 0;
+
+			if(Parser.m_Entities[i].m_Classname == "info_player_deathmatch" || 
 				Parser.m_Entities[i].m_Classname == "info_player_start" ||
 				Parser.m_Entities[i].m_Classname == "info_player_start2" ||
-				Parser.m_Entities[i].m_Classname == "info_player_coop")
+				Parser.m_Entities[i].m_Classname == "info_player_coop" ||
+				newSpawns)
 			{
 				auto origin = Parser.m_Entities[i].m_Properties.find("origin");
 				auto angle = Parser.m_Entities[i].m_Properties.find("angle");
@@ -244,11 +250,9 @@ int main(const int _kiArgC, const char** _kppcArgv)
 					oldAngle = std::stod(angle->second.c_str());
 				angleStr = "\t\tVector3 angles " + std::to_string(oldAngle + 90.0f) + " " + std::to_string(0.0000f) + " " + std::to_string(0.0000f) + "\n"; //beautiful
 
-
-				if (spawnflags != Parser.m_Entities[i].m_Properties.end() && spawnflags->second.size() > 0)
+				if ( (spawnflags != Parser.m_Entities[i].m_Properties.end() && spawnflags->second.size() > 0) || newSpawns)
 				{
-					int spawnfl = 0;
-					spawnfl = std::stoi(spawnflags->second.c_str());
+					int spawnfl = newSpawns ? newSpawns : std::stoi(spawnflags->second.c_str()); //if newSpawns then spawnfl = newSpawns, else get spawnflags
 					if (spawnfl & 1)
 						spawnStr += "\t\tBool8 TeamA 0\n"; //idk why but it has to be 0
 					if (spawnfl & 2)
