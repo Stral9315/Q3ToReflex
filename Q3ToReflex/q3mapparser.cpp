@@ -122,6 +122,7 @@ const bool CQ3MapParser::ParseQ3Map(const char* _kpcFileName)
 					std::string line = "";
 					std::string *key = nullptr;
 					std::string *value = nullptr;
+
 					//Ideally instead of doing all of this, change Lines to be non-tokenized, and tokenize it for all the other stuff?
 					for (int j = 0; j < Lines[i].size(); j++) //Increment through tokens
 					{
@@ -258,6 +259,15 @@ const std::string& CQ3MapParser::SubstituteMaterial(std::string& _rResult, const
 	{
 		_rResult = "internal/editor/textures/editor_clip";
 	}
+	else if (strcmp(_krInput.c_str(), "common/full_clip") == 0)
+	{
+		_rResult = "internal/editor/textures/editor_fullclip";
+	}
+	else if (strcmp(_krInput.c_str(), "common/weapclip") == 0)
+	{
+		_rResult = "internal/editor/textures/editor_weaponclip";
+	}
+
 
 	return(_rResult);
 }
